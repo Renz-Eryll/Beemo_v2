@@ -14,13 +14,13 @@ const HARDWARE = [
 export default function GuidePage() {
   return (
     <article className="max-w-3xl">
-      <h1 className="text-2xl font-semibold tracking-tight">Bee guide</h1>
+      <h1 className="display text-[34px] leading-[1.05]">Bee guide</h1>
       <p className="mt-2 leading-relaxed text-muted">
         BeeMo is built for <em>Tetragonula biroi</em>, the stingless bee native to the Philippines. Its honey is prized, but colonies are sensitive to
         heat and moisture, so small changes inside the box matter.
       </p>
 
-      <h2 className="mt-10 text-lg font-semibold">Ideal conditions</h2>
+      <h2 className="display mt-10 text-[20px]">Ideal conditions</h2>
       <div className="mt-4 grid gap-3 sm:grid-cols-3">
         {METRICS.map((m) => (
           <div key={m} className="card p-4">
@@ -34,7 +34,7 @@ export default function GuidePage() {
         ))}
       </div>
 
-      <h2 className="mt-10 text-lg font-semibold">Reading the indicators</h2>
+      <h2 className="display mt-10 text-[20px]">Reading the indicators</h2>
       <ul className="mt-3 space-y-2 text-sm">
         <li className="flex items-center gap-2">
           <span className="size-2.5 rounded-full bg-good" aria-hidden /> <strong className="font-medium">In range</strong>: no action needed
@@ -50,7 +50,7 @@ export default function GuidePage() {
         Harvest cycles run about six months. When a hive reaches 5 kg you’ll get a “ready to harvest” alert.
       </p>
 
-      <h2 id="device" className="mt-10 scroll-mt-8 text-lg font-semibold">
+      <h2 id="device" className="display mt-10 scroll-mt-8 text-[20px]">
         Sensor kit
       </h2>
       <div className="card mt-4 overflow-x-auto">
@@ -67,7 +67,7 @@ export default function GuidePage() {
       </div>
       <p className="mt-3 text-sm text-muted">Fans run at about 3500 RPM and 40 dB so they don’t disturb the colony.</p>
 
-      <h3 className="mt-8 font-semibold">Connecting a hive</h3>
+      <h3 className="display mt-8 text-[16px]">Connecting a hive</h3>
       <ol className="mt-3 list-decimal space-y-2 pl-5 text-sm leading-relaxed">
         <li>
           Open the hive’s <strong className="font-medium">Device &amp; settings</strong> page and generate a device key.

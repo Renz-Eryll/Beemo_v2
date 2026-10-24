@@ -21,11 +21,11 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
       <Link href={`/hives/${hive.id}`} className="text-sm text-muted hover:text-ink">
         ← {hive.name}
       </Link>
-      <h1 className="mt-3 text-2xl font-semibold tracking-tight">Device &amp; settings</h1>
+      <h1 className="display mt-3 text-[34px] leading-[1.05]">Device &amp; settings</h1>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-2">
         <section className="card p-5">
-          <h2 className="text-sm font-semibold">Sensor kit</h2>
+          <h2 className="display text-[17px]">Sensor kit</h2>
           <p className="mt-1 mb-4 text-sm text-muted">
             {hive.lastSeenAt ? `Last reported ${timeAgo(hive.lastSeenAt)}.` : "This hive hasn't reported yet."} Each hive’s ESP8266 uses its own key.
           </p>
@@ -37,7 +37,7 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
 
         <div className="space-y-6">
           <section className="card p-5">
-            <h2 className="text-sm font-semibold">Details</h2>
+            <h2 className="display text-[17px]">Details</h2>
             <ActionForm action={updateHive.bind(null, hive.id)} className="mt-4 space-y-4">
               <div>
                 <label className="label" htmlFor="name">
@@ -56,7 +56,7 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
           </section>
 
           <section className="card p-5">
-            <h2 className="text-sm font-semibold text-high">Delete hive</h2>
+            <h2 className="display text-[17px] text-high">Delete hive</h2>
             <p className="mt-1 mb-4 text-sm text-muted">Removes the hive with all its readings, cycles and alerts.</p>
             <ConfirmButton
               action={deleteHive.bind(null, hive.id)}

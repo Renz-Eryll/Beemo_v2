@@ -16,9 +16,9 @@ export default async function HivesPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Hives</h1>
+      <h1 className="display text-[34px] leading-[1.05]">Hives</h1>
       {welcome && (
-        <p className="mt-2 text-sm text-muted">Your apiary is ready. Add your first hive to get a device key for its sensor kit.</p>
+        <p className="mt-2 max-w-2xl text-muted">Your apiary is ready. Add your first hive to get a device key for its sensor kit.</p>
       )}
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
@@ -46,7 +46,7 @@ export default async function HivesPage({ searchParams }: { searchParams: Promis
 
         {isAdmin && (
           <section className="card self-start p-5">
-            <h2 className="text-sm font-semibold">Add a hive</h2>
+            <h2 className="display text-[17px]">Add a hive</h2>
             <ActionForm action={createHive} className="mt-4 space-y-4">
               <div>
                 <label className="label" htmlFor="name">

@@ -9,8 +9,8 @@ export const metadata: Metadata = { title: "Create an apiary" };
 export default function SignupPage() {
   return (
     <AuthShell>
-      <h1 className="text-2xl font-semibold tracking-tight">Create your apiary</h1>
-      <p className="mt-1.5 text-sm text-muted">You’ll be the admin. Add hives and workers next.</p>
+      <h1 className="display text-[34px] leading-none">Create your apiary</h1>
+      <p className="mt-2 text-muted">You’ll be the admin. Add hives and workers next.</p>
 
       <ActionForm action={signup} className="mt-8 space-y-4">
         <div>
@@ -45,7 +45,7 @@ export default function SignupPage() {
 
       <p className="mt-6 text-center text-sm text-muted">
         Already have an account?{" "}
-        <Link href="/login" className="font-medium text-ink underline-offset-4 hover:underline">
+        <Link href="/login" className="font-semibold text-honey-text hover:underline">
           Sign in
         </Link>
       </p>

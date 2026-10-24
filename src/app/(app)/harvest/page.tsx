@@ -18,15 +18,15 @@ export default async function HarvestPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Harvest cycles</h1>
-      <p className="mt-1 text-sm text-muted">
+      <h1 className="display text-[34px] leading-[1.05]">Harvest cycles</h1>
+      <p className="mt-2 max-w-2xl text-muted">
         Each cycle runs about six months. {completed.length > 0 && `${completed.length} harvests recorded, ${totalYield.toFixed(1)} kg of honey in total.`}
       </p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
         <div className="space-y-8">
           <section>
-            <h2 className="text-sm font-semibold">In progress</h2>
+            <h2 className="display text-[17px]">In progress</h2>
             {active.length === 0 ? (
               <p className="card mt-3 px-5 py-8 text-center text-sm text-muted">No cycles in progress.</p>
             ) : (
@@ -44,7 +44,7 @@ export default async function HarvestPage() {
                         </p>
                       </div>
                       <div className="mt-3 h-1.5 rounded-full bg-sunken" aria-hidden>
-                        <div className="h-1.5 rounded-full bg-honey" style={{ width: `${Math.min(100, (days / 182) * 100)}%` }} />
+                        <div className="h-1.5 rounded-full bg-gold" style={{ width: `${Math.min(100, (days / 182) * 100)}%` }} />
                       </div>
                       {isAdmin && (
                         <details className="mt-4">
@@ -80,18 +80,18 @@ export default async function HarvestPage() {
           </section>
 
           <section>
-            <h2 className="text-sm font-semibold">Completed</h2>
+            <h2 className="display text-[17px]">Completed</h2>
             {completed.length === 0 ? (
               <p className="card mt-3 px-5 py-8 text-center text-sm text-muted">No harvests recorded yet.</p>
             ) : (
               <div className="card mt-3 overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="text-left text-xs text-muted">
-                    <tr className="border-b border-line">
+                  <thead className="text-left">
+                    <tr className="border-b border-line [&>th]:eyebrow">
                       <th className="px-5 py-3 font-medium">Hive</th>
                       <th className="px-3 py-3 font-medium">Cycle</th>
                       <th className="px-3 py-3 font-medium">Period</th>
-                      <th className="px-3 py-3 text-right font-medium">Honey</th>
+                      <th className="px-3 py-3 font-medium">Honey</th>
                       {isAdmin && <th className="px-5 py-3" />}
                     </tr>
                   </thead>
@@ -106,7 +106,7 @@ export default async function HarvestPage() {
                         <td className="whitespace-nowrap px-3 py-3 text-muted">
                           {dateLabel(c.startDate)} – {c.completedAt ? dateLabel(c.completedAt) : "—"}
                         </td>
-                        <td className="num px-3 py-3 text-right">{c.yieldKg != null ? `${c.yieldKg.toFixed(2)} kg` : "—"}</td>
+                        <td className="num px-3 py-3">{c.yieldKg != null ? `${c.yieldKg.toFixed(2)} kg` : "—"}</td>
                         {isAdmin && (
                           <td className="px-5 py-3 text-right">
                             <ConfirmButton action={deleteCycle.bind(null, c.id)} confirm={`Delete cycle ${c.cycleNumber} of ${c.hiveName}?`}>
@@ -125,9 +125,9 @@ export default async function HarvestPage() {
 
         {isAdmin && (
           <section className="card self-start p-5">
-            <h2 className="text-sm font-semibold">Start a cycle</h2>
+            <h2 className="display text-[17px]">Start a cycle</h2>
             {idleHives.length === 0 ? (
-              <p className="mt-2 text-sm text-muted">Every hive has a cycle in progress.</p>
+              <p className="mt-2 max-w-2xl text-muted">Every hive has a cycle in progress.</p>
             ) : (
               <ActionForm action={startCycle} className="mt-4 space-y-4">
                 <div>
