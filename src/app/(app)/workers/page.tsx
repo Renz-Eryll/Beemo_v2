@@ -13,8 +13,8 @@ export default async function WorkersPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold tracking-tight">Workers</h1>
-      <p className="mt-1 text-sm text-muted">Workers can monitor hives, see alerts and view harvest cycles. Reports and settings stay with the admin.</p>
+      <h1 className="display text-[34px] leading-[1.05]">Workers</h1>
+      <p className="mt-2 max-w-2xl text-muted">Workers can monitor hives, see alerts and view harvest cycles. Reports and settings stay with the admin.</p>
 
       <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
         <ul className="card divide-y divide-line self-start">
@@ -50,7 +50,7 @@ export default async function WorkersPage() {
         </ul>
 
         <section className="card self-start p-5">
-          <h2 className="text-sm font-semibold">Add a worker</h2>
+          <h2 className="display text-[17px]">Add a worker</h2>
           <p className="mt-1 text-xs text-muted">Share the temporary password with them in person.</p>
           <ActionForm action={addWorker} className="mt-4 space-y-4">
             <div>

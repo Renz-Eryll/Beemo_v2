@@ -20,7 +20,7 @@ export default async function ReportsPage({ searchParams }: Props) {
   if (hives.length === 0) {
     return (
       <>
-        <h1 className="text-2xl font-semibold tracking-tight">Reports</h1>
+        <h1 className="display text-[34px] leading-[1.05]">Reports</h1>
         <p className="card mt-8 px-6 py-12 text-center text-sm text-muted">Add a hive to see reports.</p>
       </>
     );
@@ -51,8 +51,8 @@ export default async function ReportsPage({ searchParams }: Props) {
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Reports</h1>
-          <p className="mt-1 text-sm text-muted">
+          <h1 className="display text-[34px] leading-[1.05]">Reports</h1>
+          <p className="mt-2 max-w-2xl text-muted">
             {hive.name} · {periodLabel} · {dateLabel(from)} – {dateLabel(to)}
           </p>
         </div>
@@ -105,39 +105,39 @@ export default async function ReportsPage({ searchParams }: Props) {
           <div className="card mt-8 overflow-x-auto">
             <table className="w-full text-sm">
               <caption className="sr-only">Summary statistics</caption>
-              <thead className="text-left text-xs text-muted">
-                <tr className="border-b border-line">
+              <thead className="text-left">
+                <tr className="border-b border-line [&>th]:eyebrow">
                   <th className="px-5 py-3 font-medium">Measure</th>
-                  <th className="px-3 py-3 text-right font-medium">Average</th>
-                  <th className="px-3 py-3 text-right font-medium">Lowest</th>
-                  <th className="px-3 py-3 text-right font-medium">Highest</th>
-                  <th className="px-5 py-3 text-right font-medium">Target</th>
+                  <th className="px-3 py-3 font-medium">Average</th>
+                  <th className="px-3 py-3 font-medium">Lowest</th>
+                  <th className="px-3 py-3 font-medium">Highest</th>
+                  <th className="px-5 py-3 font-medium">Target</th>
                 </tr>
               </thead>
               <tbody className="num divide-y divide-line">
                 <tr>
                   <td className="px-5 py-3 font-sans">Temperature</td>
-                  <td className="px-3 py-3 text-right">{stats.temperature.avg.toFixed(1)}°C</td>
-                  <td className="px-3 py-3 text-right">{stats.temperature.min.toFixed(1)}°C</td>
-                  <td className="px-3 py-3 text-right">{stats.temperature.max.toFixed(1)}°C</td>
-                  <td className="px-5 py-3 text-right text-muted">32–35°C</td>
+                  <td className="px-3 py-3">{stats.temperature.avg.toFixed(1)}°C</td>
+                  <td className="px-3 py-3">{stats.temperature.min.toFixed(1)}°C</td>
+                  <td className="px-3 py-3">{stats.temperature.max.toFixed(1)}°C</td>
+                  <td className="px-5 py-3 text-muted">32–35°C</td>
                 </tr>
                 <tr>
                   <td className="px-5 py-3 font-sans">Humidity</td>
-                  <td className="px-3 py-3 text-right">{stats.humidity.avg.toFixed(1)}%</td>
-                  <td className="px-3 py-3 text-right">{stats.humidity.min.toFixed(1)}%</td>
-                  <td className="px-3 py-3 text-right">{stats.humidity.max.toFixed(1)}%</td>
-                  <td className="px-5 py-3 text-right text-muted">50–60%</td>
+                  <td className="px-3 py-3">{stats.humidity.avg.toFixed(1)}%</td>
+                  <td className="px-3 py-3">{stats.humidity.min.toFixed(1)}%</td>
+                  <td className="px-3 py-3">{stats.humidity.max.toFixed(1)}%</td>
+                  <td className="px-5 py-3 text-muted">50–60%</td>
                 </tr>
                 <tr>
                   <td className="px-5 py-3 font-sans">Hive weight</td>
-                  <td className="px-3 py-3 text-right">
+                  <td className="px-3 py-3">
                     {weightChange >= 0 ? "+" : "−"}
                     {Math.abs(weightChange).toFixed(2)} kg
                   </td>
-                  <td className="px-3 py-3 text-right">{stats.weight.min.toFixed(2)} kg</td>
-                  <td className="px-3 py-3 text-right">{stats.weight.max.toFixed(2)} kg</td>
-                  <td className="px-5 py-3 text-right text-muted">1–5 kg</td>
+                  <td className="px-3 py-3">{stats.weight.min.toFixed(2)} kg</td>
+                  <td className="px-3 py-3">{stats.weight.max.toFixed(2)} kg</td>
+                  <td className="px-5 py-3 text-muted">1–5 kg</td>
                 </tr>
               </tbody>
             </table>
@@ -147,12 +147,12 @@ export default async function ReportsPage({ searchParams }: Props) {
           </div>
 
           <section className="mt-8">
-            <h2 className="text-sm font-semibold">Insights</h2>
+            <h2 className="display text-[17px]">Insights</h2>
             <ul className="mt-3 space-y-2">
               {insights.map((insight, i) => (
                 <li key={i} className="card flex gap-3 p-4 text-sm leading-relaxed">
                   <span
-                    className={`mt-1.5 size-2 shrink-0 rounded-full ${insight.tone === "good" ? "bg-good" : insight.tone === "warn" ? "bg-high" : "bg-honey"}`}
+                    className={`mt-1.5 size-2 shrink-0 rounded-full ${insight.tone === "good" ? "bg-good" : insight.tone === "warn" ? "bg-high" : "bg-gold"}`}
                     aria-hidden
                   />
                   <span>
@@ -165,7 +165,7 @@ export default async function ReportsPage({ searchParams }: Props) {
           </section>
 
           <section className="mt-8 space-y-4">
-            <h2 className="text-sm font-semibold">{days <= 7 ? "3-hour" : "Daily"} averages</h2>
+            <h2 className="display text-[17px]">{days <= 7 ? "3-hour" : "Daily"} averages</h2>
             <MetricChart metric="temperature" data={series} span={chartSpan} />
             <MetricChart metric="humidity" data={series} span={chartSpan} />
             <MetricChart metric="weight" data={series} span={chartSpan} />

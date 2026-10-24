@@ -36,11 +36,17 @@ export const rangeStatus = (metric: Metric, value: number): RangeStatus => {
   return "ok";
 };
 
+// The original BeeMo wording.
 export const STATUS_LABEL: Record<RangeStatus, string> = {
-  low: "Below range",
-  ok: "In range",
-  high: "Above range",
+  low: "Too Low!",
+  ok: "Normal",
+  high: "Too High!",
 };
+
+// Weight above the range means the hive is ready to harvest, not a problem.
+const WEIGHT_LABEL: Record<RangeStatus, string> = { low: "Building up", ok: "Normal", high: "Ready to harvest" };
+
+export const statusLabel = (metric: Metric, status: RangeStatus) => (metric === "weight" ? WEIGHT_LABEL : STATUS_LABEL)[status];
 
 export const formatValue = (metric: Metric, value: number) =>
   `${value.toFixed(metric === "weight" ? 2 : 1)}${RANGES[metric].unit}`;
