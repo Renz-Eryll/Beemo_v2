@@ -16,12 +16,12 @@ export function SubmitButton({ children, pending: pendingLabel, className = "btn
 export function FormMessage({ state }: { state: ActionState }) {
   if (state?.error) {
     return (
-      <p role="alert" className="rounded-md bg-high-soft px-3 py-2 text-sm text-ink">
+      <p role="alert" className="rounded-[6px] border border-high/30 bg-high-soft px-3 py-2 text-[13px] font-medium text-high">
         {state.error}
       </p>
     );
   }
-  if (state?.ok) return <p className="text-sm text-muted">{state.ok}</p>;
+  if (state?.ok) return <p className="text-[13px] font-medium text-good">{state.ok}</p>;
   return null;
 }
 
