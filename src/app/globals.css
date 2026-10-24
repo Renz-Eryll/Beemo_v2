@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-sunken: var(--sunken);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-faint: var(--faint);
+  --color-line: var(--line);
+  --color-honey: var(--honey);
+  --color-honey-soft: var(--honey-soft);
+  --color-good: var(--good);
+  --color-high: var(--high);
+  --color-low: var(--low);
+  --color-high-soft: var(--high-soft);
+  --color-low-soft: var(--low-soft);
+  --color-good-soft: var(--good-soft);
+}
+
+:root {
+  --paper: #f6f4ee;
+  --surface: #ffffff;
+  --sunken: #eeebe3;
+  --ink: #1d1b16;
+  --muted: #5f5c53;
+  --faint: #9b978c;
+  --line: #e2ded3;
+  --honey: #b5761a;
+  --honey-soft: #f6ead3;
+  /* Status colors (reserved): in range, above range, below range. Always paired with a label. */
+  --good: #0ca30c;
+  --high: #d03b3b;
+  --low: #2a78d6;
+  --good-soft: #e3f3e1;
+  --high-soft: #f9e4e2;
+  --low-soft: #e2edfa;
+  --chart-line: #3b3830;
+  --chart-band: #e9e5da;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #14130f;
+    --surface: #1c1b17;
+    --sunken: #25231e;
+    --ink: #eeebe3;
+    --muted: #aaa69a;
+    --faint: #737065;
+    --line: #2f2d27;
+    --honey: #e2a84a;
+    --honey-soft: #362b18;
+    --good: #0ca30c;
+    --high: #e66767;
+    --low: #3987e5;
+    --good-soft: #17301a;
+    --high-soft: #3a2120;
+    --low-soft: #1a2a40;
+    --chart-line: #d8d4c8;
+    --chart-band: #2a2822;
+    color-scheme: dark;
+  }
+}
+
+@layer base {
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+  }
+  ::selection {
+    background: var(--honey-soft);
+  }
+  :focus-visible {
+    outline: 2px solid var(--honey);
+    outline-offset: 2px;
+  }
+}
+
+@utility field {
+  @apply h-10 w-full rounded-md border border-line bg-surface px-3 text-sm text-ink placeholder:text-faint transition-colors hover:border-faint focus:border-honey focus:outline-none;
+}
+@utility label {
+  @apply mb-1.5 block text-xs font-medium text-muted;
+}
+@utility btn {
+  @apply inline-flex h-9 items-center justify-center gap-2 rounded-md px-3.5 text-sm font-medium whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-50;
+}
+@utility btn-primary {
+  @apply btn bg-ink text-paper hover:bg-ink/85;
+}
+@utility btn-outline {
+  @apply btn border border-line bg-surface text-ink hover:border-faint;
+}
+@utility btn-ghost {
+  @apply btn text-muted hover:bg-sunken hover:text-ink;
+}
+@utility btn-danger {
+  @apply btn border border-high/40 text-high hover:bg-high-soft;
+}
+@utility card {
+  @apply rounded-xl border border-line bg-surface;
+}
+@utility num {
+  @apply font-mono tabular-nums tracking-tight;
+}
