@@ -36,6 +36,17 @@ export default function MetricChart({ metric, data, span }: Props) {
     Math.ceil(Math.max(max + pad, ...values) / step) * step,
   ];
   const ticks = Array.from({ length: Math.round((domain[1] - domain[0]) / step) + 1 }, (_, i) => domain[0] + i * step);
+  // Multi-day ranges: one tick per Manila midnight (thinned to ≤ 8) so dates don't repeat.
+  const DAY_MS = 86_400_000;
+  const PH_OFFSET = 8 * 3_600_000;
+  const first = data[0].t;
+  const last = data[data.length - 1].t;
+  const firstMidnight = Math.ceil((first + PH_OFFSET) / DAY_MS) * DAY_MS - PH_OFFSET;
+  const dayTicks: number[] = [];
+  for (let t = firstMidnight; t <= last; t += DAY_MS) dayTicks.push(t);
+  const every = Math.ceil(dayTicks.length / 8);
+  const xTicks = span === "day" ? undefined : dayTicks.filter((_, i) => i % every === 0);
+
   const latest = values[values.length - 1];
   const avg = values.reduce((a, b) => a + b, 0) / values.length;
 
@@ -66,6 +77,7 @@ export default function MetricChart({ metric, data, span }: Props) {
               tick={{ fill: "var(--faint)", fontSize: 11 }}
               axisLine={false}
               tickLine={false}
+              ticks={xTicks}
               minTickGap={40}
             />
             <YAxis
