@@ -23,5 +23,5 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   // Skip API routes (they authenticate themselves), Next internals and static files.
-  matcher: ["/((?!api/|_next/|favicon.ico|icon.svg|img/|firmware/).*)"],
+  matcher: ["/((?!api/|_next/|favicon.ico|icon.png|img/|firmware/).*)"],
 };
