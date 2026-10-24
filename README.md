@@ -1,133 +1,78 @@
-# 🐝 BeeMo: IoT-Enabled Stingless Beehive Monitoring System
+<h1 align="center">🐝 BeeMo</h1>
 
-BeeMo is an IoT-based, web-enabled monitoring and management system designed specifically for **Tetragonula biroi**, a stingless bee species native to the Philippines. It aims to modernize beekeeping by enhancing honey production, automating environmental monitoring, and providing real-time data access through a user-friendly web interface.
+<p align="center">
+  IoT monitoring for stingless beehives (<i>Tetragonula biroi</i>): live temperature, humidity and hive weight,<br/>
+  alerts when conditions drift, harvest cycles, and reports with plain-language insights.
+</p>
 
----
-
-## 📌 Table of Contents
-
-- [Features](#features)
-- [System Overview](#system-overview)
-- [Hardware Components](#hardware-components)
-- [Software Components](#software-components)
-- [Parameter Ranges](#parameter-ranges)
-- [System Users](#system-users)
-- [Web Interface Features](#web-interface-features)
-- [Offline Functionality](#offline-functionality)
-- [Installation & Setup](#installation--setup)
-- [License](#license)
+<p align="center">
+  <a href="https://beemo-hive-monitor.vercel.app/demo"><b>Try the live demo</b></a> · read-only, simulated sensor data
+</p>
 
 ---
 
-## ✅ Features
+## Features
 
-- Real-time monitoring of **temperature**, **humidity**, and **hive weight**
-- Automated regulation of environmental parameters
-- Web and **SMS notifications** for anomalies or harvest alerts
-- Historical data analysis with **descriptive analytics**
-- Multi-hive and multi-user management with role-based access
-- Harvest cycle tracking and notifications
-- Offline temperature/humidity control during internet downtime
+- **Live monitoring**: latest readings per hive with in-range / above / below indicators (glyph + label, never color alone)
+- **History charts**: 24 hours to 90 days, one chart per measure with the recommended range shaded
+- **Alerts**: raised when a reading leaves the range (at most once per condition every 6 hours) and when a hive reaches harvest weight
+- **Harvest cycles**: six-month cycles per hive, with harvest date, honey yield and notes
+- **Reports** (admin): averages, extremes and weight change for a date range or a cycle, insights, CSV export
+- **Roles**: the admin owns the apiary; workers can monitor, but reports, workers and settings stay with the admin
+- **Device API**: each hive's ESP8266 authenticates with its own key (stored hashed, shown once) and posts readings to `/api/ingest`
+- **Demo mode**: a shared, read-only apiary whose simulated readings are topped up on visit and by a daily cron
 
----
+## Recommended ranges
 
-## 🌐 System Overview
+| Measure | Range | Why |
+| --- | --- | --- |
+| Temperature | 32–35 °C | Below, bees burn honey for warmth; above, they spend energy fanning |
+| Humidity | 50–60 % | Low stresses the colony; high invites mold and spoils honey |
+| Hive weight | 1–5 kg | The recommended window for harvesting |
 
-BeeMo integrates IoT hardware with a web system to:
+## Stack
 
-- **Monitor**: Continuously track hive conditions using sensors.
-- **Analyze**: Visualize and interpret historical trends.
-- **Notify**: Alert users via SMS and web notifications when needed.
-- **Control**: Automatically adjust hive temperature and humidity.
+Next.js 15 (App Router, Server Actions) · TypeScript · Tailwind CSS v4 · Drizzle ORM · Neon Postgres · Recharts · Vercel (hosting + cron)
 
----
+## Getting started
 
-## 🔧 Hardware Components
+```bash
+npm install
+cp .env.example .env.local   # or: vercel env pull .env.local
+npm run db:push              # create tables
+npm run db:seed              # optional: the demo apiary
+npm run dev
+```
 
-| Component         | Description                                     |
-|-------------------|-------------------------------------------------|
-| Arduino Uno       | Microcontroller for sensor control              |
-| NodeMCU ESP8266   | Wi-Fi module for internet communication         |
-| DHT22             | Temperature and humidity sensor                 |
-| Load Cell + HX711 | Weight sensor module                            |
-| PTC Heater + Fan  | For heating when temperature is too low         |
-| TEC-12706 + Fan   | For cooling during excessive heat               |
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Development server |
+| `npm run build` | Production build (type-checks and lints) |
+| `npm run db:push` | Sync the Drizzle schema to the database |
+| `npm run db:seed` | Recreate the demo apiary with 75 days of simulated readings |
 
-> DC fans operate at 3500 RPM and 40 dB to avoid disturbing the bees.
+## Sensor kit
 
----
+NodeMCU ESP8266 · DHT22 (temperature, humidity) · load cell + HX711 (weight) · PTC heater and TEC-12706 cooler with quiet fans.
 
-## 🖥️ Software Components
+The firmware in [`firmware/beemo_esp8266`](firmware/beemo_esp8266/beemo_esp8266.ino) regulates temperature locally (so the hive is protected when Wi-Fi drops) and reports once a minute:
 
-- **Frontend**: HTML, CSS, Bootstrap, JavaScript, Chart.js
-- **Backend**: PHP
-- **Authentication**: PHPmailer
-- **Notifications**: Infobip API for SMS
-- **Database**: MySQL (for sensor readings and user data)
-- **Testing**: PHPPest
+```http
+POST /api/ingest
+Authorization: Bearer bm_<device key>
+Content-Type: application/json
 
----
+{ "temperature": 33.4, "humidity": 55.2, "weight": 2.31 }
+```
 
-## 📊 Parameter Ranges
+The API validates sensor bounds, rate-limits each device to one reading per 10 seconds, raises alerts, and replies with the low/ok/high status of each measure.
 
-| Parameter   | Recommended Range                 |
-|-------------|-----------------------------------|
-| Temperature | 32°C – 35°C                        |
-| Humidity    | 50% – 60%                          |
-| Hive Weight | 1–5 kg (recommended for harvesting)|
+## History
 
----
+BeeMo started as our capstone project: a PHP/MySQL web app with Arduino sensors, built as a team.
+The original version is preserved in this repository's history at the [`legacy-php`](../../tree/legacy-php) tag (PHP code by [@CJcode6754](https://github.com/CJcode6754); I built the web UI and programmed the sensors).
+Version 2 is a rewrite for the web: multi-tenant data isolation, hashed device keys for sensor ingest, server-side validation everywhere, and a deployable demo.
 
-## 👥 System Users
+## Contact
 
-- **Administrator**: Full access, including reports, harvest cycles, and worker management.
-- **Worker/User**: Can access all features except Reports and Worker sections.
-
----
-
-## 🌐 Web Interface Features
-
-1. **Home** – Overview of the BeeMo project
-2. **Choose Hive** – Select and manage specific hives
-3. **Parameters Monitoring** – View real-time values with color indicators
-4. **Reports** – Graphs and analytics with cycle/date filters
-5. **Harvest Cycle** – Record and manage 6-month harvest cycles
-6. **Bee Guide** – Tutorial and device overview
-7. **Worker Management** – Admin-only feature to manage users
-
-### Color Indicator System
-
-- 🟢 Green: Optimal range  
-- 🔴 Red: Above range  
-- 🔵 Blue: Below range
-
----
-
-## 📴 Offline Functionality
-
-- Continues regulating temperature and humidity
-- Data is not displayed or logged until reconnection
-- Use routers, hotspots, or Wi-Fi extenders with the same SSID/password for seamless switching
-
----
-
-## ⚙️ Installation & Setup
-
-1. Clone the repository
-2. composer install
-3. Set up MySQL and import the provided database schema
-4. Configure database credentials in `config/db.php`
-5. Upload the project to a web server (e.g., XAMPP, live host)
-6 Connect the IoT hardware (Arduino + ESP8266)
-7. Register users via the provided admin credentials
-8. Start monitoring and managing your beehives!
-
----
-
-## 📄 License
-
-This project was developed for academic and research purposes. For commercial use, please contact the author for licensing information.
-
----
-
-> For questions or setup assistance, please reach out to the project team.
+**Renz Eryll Ramelo** · [LinkedIn](https://www.linkedin.com/in/renz-eryll-ramelo) · [GitHub](https://github.com/Renz-Eryll)
