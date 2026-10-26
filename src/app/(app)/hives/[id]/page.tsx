@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AlertFeed, AlertItem } from "@/components/AlertFeed";
+import { CYCLE_DAYS, CombMeter, HexMark, HoneyCell } from "@/components/Comb";
 import MetricChart from "@/components/MetricChart";
 import PageHeader from "@/components/PageHeader";
-import { AlertTag, MetricTile } from "@/components/Status";
-import { alertMessage } from "@/lib/alerts";
+import { MetricTile } from "@/components/Status";
 import { requireSession } from "@/lib/auth";
 import { getHive, latestReading, listAlerts, listCycles, readingSeries } from "@/lib/data";
 import { dateLabel, dateTimeLabel, isOnline, timeAgo } from "@/lib/format";
@@ -46,14 +47,12 @@ export default async function HivePage({ params, searchParams }: Props) {
     <>
       <PageHeader
         back={{ href: "/", label: "Overview" }}
+        eyebrow={hive.location ?? "Hive"}
         title={hive.name}
         description={
-          <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            {hive.location && <span>{hive.location}</span>}
-            <span className="flex items-center gap-1.5">
-              <span className={`size-2 rounded-full ${online ? "bg-good" : "bg-line-strong"}`} aria-hidden />
-              {latest ? `Last reading ${timeAgo(latest.recordedAt)}` : "Waiting for the first reading"}
-            </span>
+          <span className="flex items-center gap-1.5">
+            <span className={`size-2 rounded-full ${online ? "bg-good" : "bg-line-strong"}`} aria-hidden />
+            {latest ? `Last reading ${timeAgo(latest.recordedAt)}` : "Waiting for the first reading"}
           </span>
         }
         actions={
@@ -65,15 +64,25 @@ export default async function HivePage({ params, searchParams }: Props) {
         }
       />
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <MetricTile metric="temperature" value={latest?.temperature ?? null} size="lg" />
-        <MetricTile metric="humidity" value={latest?.humidity ?? null} size="lg" />
-        <MetricTile metric="weight" value={latest?.weightKg ?? null} size="lg" />
-      </div>
+      <section className="hero grid items-center gap-8 p-5 sm:p-8 lg:grid-cols-[11rem_1fr]" aria-label="Latest reading">
+        <div className="@container relative mx-auto aspect-[1/0.866] w-40 sm:w-44">
+          <HoneyCell hive={{ id: hive.id, name: hive.name, online, latest }} large />
+        </div>
+        <div className="grid gap-6 sm:grid-cols-3 sm:gap-0 sm:divide-x sm:divide-rail-line">
+          {(["temperature", "humidity", "weight"] as const).map((m, i) => (
+            <div key={m} className={i === 0 ? "sm:pr-6" : i === 1 ? "sm:px-6" : "sm:pl-6"}>
+              <MetricTile metric={m} value={latest ? (m === "weight" ? latest.weightKg : latest[m]) : null} size="lg" />
+            </div>
+          ))}
+        </div>
+      </section>
 
-      <div className="mt-10 flex flex-wrap items-end justify-between gap-3 border-b border-line">
-        <h2 className="display pb-2.5 text-[18px]">History</h2>
-        <div role="tablist" aria-label="Time range" className="flex gap-5">
+      <div className="mt-12 flex flex-wrap items-end justify-between gap-3 border-b border-line">
+        <h2 className="display flex items-center gap-2.5 pb-2.5 text-[18px]">
+          <HexMark className="bg-honey-2" size="size-3" />
+          History
+        </h2>
+        <div role="tablist" aria-label="Time range" className="-mb-px flex max-w-full gap-5 overflow-x-auto">
           {(Object.keys(SPANS) as Span[]).map((key) => (
             <Link key={key} role="tab" aria-selected={span === key} href={`?range=${key}`} scroll={false} className={span === key ? "tab-active" : "tab"}>
               {SPANS[key].label}
@@ -82,31 +91,34 @@ export default async function HivePage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      <div className="mt-5 grid gap-4 lg:grid-cols-[1fr_20rem]">
-        <div className="space-y-4">
+      <div className="mt-5 grid gap-4 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-w-0 space-y-4">
           <MetricChart metric="temperature" data={series} span={span} />
           <MetricChart metric="humidity" data={series} span={span} />
           <MetricChart metric="weight" data={series} span={span} />
         </div>
 
-        <div className="space-y-4">
-          <section className="card p-5">
+        <div className="grid content-start gap-4 md:grid-cols-2 xl:grid-cols-1">
+          <section className="card comb-light p-5">
             <p className="eyebrow">Harvest cycle</p>
             {active ? (
               <>
-                <p className="display mt-2 text-[22px]">Cycle {active.cycleNumber}</p>
+                <div className="mt-2 flex items-baseline justify-between gap-2">
+                  <p className="display text-[24px]">Cycle {active.cycleNumber}</p>
+                  <p className="text-xs text-muted">
+                    Week <span className="num text-ink">{Math.min(26, Math.floor(cycleDays / 7) + 1)}</span> of 26
+                  </p>
+                </div>
                 <p className="text-[13px] text-muted">
                   {dateLabel(active.startDate)} → {dateLabel(active.plannedEndDate)}
                 </p>
-                <div className="mt-3 flex items-center gap-3">
-                  <div className="h-1.5 flex-1 rounded-full bg-sunken" aria-hidden>
-                    <div className="h-1.5 rounded-full bg-gold" style={{ width: `${Math.min(100, (cycleDays / 182) * 100)}%` }} />
-                  </div>
-                  <span className="text-xs text-muted">
-                    <span className="num">{cycleDays}</span> of 182 days
-                  </span>
+                <div className="mt-4">
+                  <CombMeter days={cycleDays} />
                 </div>
-                <Link href="/harvest" className="mt-4 inline-block text-[13px] font-semibold text-honey-text hover:underline">
+                <p className="mt-2 text-xs text-muted">
+                  <span className="num text-ink">{cycleDays}</span> of {CYCLE_DAYS} days
+                </p>
+                <Link href="/harvest" className="btn-honey mt-4">
                   Record a harvest
                 </Link>
               </>
@@ -120,22 +132,18 @@ export default async function HivePage({ params, searchParams }: Props) {
             )}
           </section>
 
-          <section className="card">
-            <p className="eyebrow px-5 pt-5">Recent alerts</p>
+          <section className="card p-5">
+            <p className="eyebrow">Recent alerts</p>
             {alerts.length === 0 ? (
-              <p className="px-5 pt-2 pb-5 text-sm text-muted">Nothing out of range recently.</p>
+              <p className="pt-2 text-sm text-muted">Nothing out of range recently.</p>
             ) : (
-              <ul className="mt-2 divide-y divide-line">
-                {alerts.map((a) => (
-                  <li key={a.id} className="px-5 py-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <AlertTag state={a.state} />
-                      <span className="text-xs text-faint">{dateTimeLabel(a.createdAt)}</span>
-                    </div>
-                    <p className={`mt-1.5 text-[13px] ${a.readAt ? "text-muted" : ""}`}>{alertMessage(a)}</p>
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-2">
+                <AlertFeed>
+                  {alerts.map((a) => (
+                    <AlertItem key={a.id} alert={a} time={dateTimeLabel(a.createdAt)} showHive={false} />
+                  ))}
+                </AlertFeed>
+              </div>
             )}
           </section>
         </div>

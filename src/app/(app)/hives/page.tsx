@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createHive } from "@/app/actions/hives";
+import { MiniCell } from "@/components/Comb";
 import { ActionForm, SubmitButton } from "@/components/forms";
+import PageHeader from "@/components/PageHeader";
 import { requireSession } from "@/lib/auth";
 import { listHives } from "@/lib/data";
 import { isOnline, timeAgo } from "@/lib/format";
+import { formatValue } from "@/lib/ranges";
 
 export const metadata: Metadata = { title: "Hives" };
 
@@ -16,38 +19,56 @@ export default async function HivesPage({ searchParams }: { searchParams: Promis
 
   return (
     <>
-      <h1 className="display text-[34px] leading-[1.05]">Hives</h1>
-      {welcome && (
-        <p className="mt-2 max-w-2xl text-muted">Your apiary is ready. Add your first hive to get a device key for its sensor kit.</p>
-      )}
+      <PageHeader
+        eyebrow={`${hives.length} ${hives.length === 1 ? "hive" : "hives"}`}
+        title="Hives"
+        description={welcome && "Your apiary is ready. Add your first hive to get a device key for its sensor kit."}
+      />
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <ul className="card divide-y divide-line self-start">
-          {hives.length === 0 && <li className="px-5 py-10 text-center text-sm text-muted">No hives yet.</li>}
-          {hives.map((hive) => (
-            <li key={hive.id} className="flex items-center gap-4 px-5 py-4">
-              <span className={`size-2 shrink-0 rounded-full ${isOnline(hive.lastSeenAt) ? "bg-good" : "bg-faint"}`} aria-hidden />
-              <div className="min-w-0 flex-1">
-                <Link href={`/hives/${hive.id}`} className="font-medium hover:underline hover:underline-offset-4">
-                  {hive.name}
-                </Link>
-                <p className="truncate text-xs text-faint">
-                  {hive.location ?? "No location"} · {hive.lastSeenAt ? `seen ${timeAgo(hive.lastSeenAt)}` : "never connected"}
-                </p>
-              </div>
-              {isAdmin && (
-                <Link href={`/hives/${hive.id}/device`} className="btn-ghost">
-                  Device
-                </Link>
-              )}
-            </li>
-          ))}
-        </ul>
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        {hives.length === 0 ? (
+          <p className="card comb-light self-start px-5 py-14 text-center text-sm text-muted">No hives yet.</p>
+        ) : (
+          <ul className="grid content-start gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+            {hives.map((hive) => {
+              const live = isOnline(hive.lastSeenAt);
+              const r = hive.latest;
+              return (
+                <li key={hive.id} className="card flex flex-col">
+                  <Link href={`/hives/${hive.id}`} className="group flex items-center gap-4 p-4">
+                    <MiniCell weight={r?.weightKg ?? null} online={live} />
+                    <div className="min-w-0 flex-1">
+                      <p className="display truncate text-[17px] group-hover:text-honey-text">{hive.name}</p>
+                      <p className="truncate text-xs text-faint">{hive.location ?? "No location"}</p>
+                      <p className="mt-1.5 flex items-center gap-1.5 text-xs text-muted">
+                        <span className={`size-1.5 rounded-full ${live ? "bg-good" : "bg-faint"}`} aria-hidden />
+                        {live ? "Online" : hive.lastSeenAt ? `Seen ${timeAgo(hive.lastSeenAt)}` : "Never connected"}
+                      </p>
+                    </div>
+                  </Link>
+                  <div className="mt-auto flex items-center justify-between gap-3 border-t border-line px-4 py-2.5">
+                    <p className="num truncate text-[12px] text-muted">
+                      {r ? `${formatValue("temperature", r.temperature)} · ${formatValue("humidity", r.humidity)} · ${formatValue("weight", r.weightKg)}` : "No readings yet"}
+                    </p>
+                    {isAdmin && (
+                      <Link href={`/hives/${hive.id}/device`} className="btn-ghost h-7 px-2 text-[12px]">
+                        Device
+                      </Link>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        )}
 
         {isAdmin && (
-          <section className="card self-start p-5">
-            <h2 className="display text-[17px]">Add a hive</h2>
-            <ActionForm action={createHive} className="mt-4 space-y-4">
+          <section className="card w-full max-w-xl self-start overflow-hidden xl:max-w-none">
+            <div className="comb-dark bg-rail px-5 py-4 text-rail-ink">
+              <h2 className="display text-[17px] text-honey">Add a hive</h2>
+              <p className="mt-0.5 text-xs text-rail-muted">You’ll get a device key for its sensor kit next.</p>
+            </div>
+            <ActionForm action={createHive} className="space-y-4 p-5">
               <div>
                 <label className="label" htmlFor="name">
                   Name

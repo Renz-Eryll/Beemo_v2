@@ -1,16 +1,51 @@
 import type { Metadata } from "next";
+import { HexMark, RangeRuler } from "@/components/Comb";
 import MetricChart from "@/components/MetricChart";
+import PageHeader, { SectionTitle } from "@/components/PageHeader";
+import { MetricIcon, statusText } from "@/components/Status";
+import type { Metric } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth";
 import { listCycles, listHives, periodStats, readingSeries } from "@/lib/data";
 import { dateLabel } from "@/lib/format";
 import { generateInsights } from "@/lib/insights";
+import { RANGES, rangeStatus, statusLabel } from "@/lib/ranges";
 
 export const metadata: Metadata = { title: "Reports" };
 
 const DAY = 86_400_000;
 const PRESETS = { "7": "Last 7 days", "30": "Last 30 days", "90": "Last 90 days" } as const;
 
+const TONE = {
+  good: { label: "Good", tag: "bg-good-soft text-good", edge: "border-l-good" },
+  watch: { label: "Watch", tag: "bg-honey-soft text-honey-text", edge: "border-l-gold" },
+  warn: { label: "Warning", tag: "bg-high-soft text-high", edge: "border-l-high" },
+} as const;
+
 type Props = { searchParams: Promise<{ hive?: string; period?: string }> };
+
+// One measure's period on a ruler: the bar spans lowest–highest, the marker sits on the headline value.
+function MeasureCard({ metric, headline, marker, spread, foot }: { metric: Metric; headline: string; marker: number; spread: [number, number]; foot: React.ReactNode }) {
+  const { label, min, max, unit } = RANGES[metric];
+  const status = rangeStatus(metric, marker);
+  return (
+    <div className="card flex flex-col p-5">
+      <div className="flex items-center gap-2 text-faint">
+        <MetricIcon metric={metric} className="size-4" />
+        <p className="eyebrow flex-1">{label}</p>
+        <span className="num text-[11px]">
+          {min}–{max}
+          {unit}
+        </span>
+      </div>
+      <p className="num mt-3 text-[28px] leading-none font-medium sm:text-[32px]">{headline}</p>
+      <p className={`mt-1.5 text-[12px] font-semibold ${statusText(metric, status)}`}>{statusLabel(metric, status)}</p>
+      <div className="mt-4">
+        <RangeRuler metric={metric} value={marker} spread={spread} labels />
+      </div>
+      <div className="mt-auto flex justify-between gap-3 border-t border-line pt-3 text-xs text-muted">{foot}</div>
+    </div>
+  );
+}
 
 export default async function ReportsPage({ searchParams }: Props) {
   const session = await requireAdmin();
@@ -20,8 +55,8 @@ export default async function ReportsPage({ searchParams }: Props) {
   if (hives.length === 0) {
     return (
       <>
-        <h1 className="display text-[34px] leading-[1.05]">Reports</h1>
-        <p className="card mt-8 px-6 py-12 text-center text-sm text-muted">Add a hive to see reports.</p>
+        <PageHeader title="Reports" />
+        <p className="card comb-light px-6 py-14 text-center text-sm text-muted">Add a hive to see reports.</p>
       </>
     );
   }
@@ -49,28 +84,24 @@ export default async function ReportsPage({ searchParams }: Props) {
 
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="display text-[34px] leading-[1.05]">Reports</h1>
-          <p className="mt-2 max-w-2xl text-muted">
-            {hive.name} · {periodLabel} · {dateLabel(from)} – {dateLabel(to)}
-          </p>
-        </div>
-        <a
-          href={`/api/reports/csv?hive=${hive.id}&from=${from.toISOString()}&to=${to.toISOString()}`}
-          className="btn-outline"
-        >
-          Export CSV
-        </a>
-      </div>
+      <PageHeader
+        eyebrow={periodLabel}
+        title="Reports"
+        description={`${hive.name} · ${dateLabel(from)} – ${dateLabel(to)}`}
+        actions={
+          <a href={`/api/reports/csv?hive=${hive.id}&from=${from.toISOString()}&to=${to.toISOString()}`} className="btn-outline">
+            Export CSV
+          </a>
+        }
+      />
 
       {/* Plain GET form: filters live in the URL, so reports can be bookmarked and shared. */}
-      <form className="mt-6 flex flex-wrap items-end gap-3">
-        <div>
+      <form className="card flex flex-wrap items-end gap-3 p-4">
+        <div className="min-w-0 flex-1 sm:flex-none">
           <label className="label" htmlFor="hive">
             Hive
           </label>
-          <select id="hive" name="hive" defaultValue={hive.id} className="field w-56">
+          <select id="hive" name="hive" defaultValue={hive.id} className="field sm:w-56">
             {hives.map((h) => (
               <option key={h.id} value={h.id}>
                 {h.name}
@@ -78,11 +109,11 @@ export default async function ReportsPage({ searchParams }: Props) {
             ))}
           </select>
         </div>
-        <div>
+        <div className="min-w-0 flex-1 sm:flex-none">
           <label className="label" htmlFor="period">
             Period
           </label>
-          <select id="period" name="period" defaultValue={cycle ? period : period in PRESETS ? period : "30"} className="field w-56">
+          <select id="period" name="period" defaultValue={cycle ? period : period in PRESETS ? period : "30"} className="field sm:w-56">
             {Object.entries(PRESETS).map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
@@ -95,77 +126,87 @@ export default async function ReportsPage({ searchParams }: Props) {
             ))}
           </select>
         </div>
-        <button className="btn-primary">Show</button>
+        <button className="btn-primary h-10 w-full sm:w-auto">Show</button>
       </form>
 
       {stats.count === 0 ? (
-        <p className="card mt-8 px-6 py-12 text-center text-sm text-muted">No readings in this period.</p>
+        <p className="card comb-light mt-8 px-6 py-14 text-center text-sm text-muted">No readings in this period.</p>
       ) : (
         <>
-          <div className="card mt-8 overflow-x-auto">
-            <table className="w-full text-sm">
-              <caption className="sr-only">Summary statistics</caption>
-              <thead className="text-left">
-                <tr className="border-b border-line [&>th]:eyebrow">
-                  <th className="px-5 py-3 font-medium">Measure</th>
-                  <th className="px-3 py-3 font-medium">Average</th>
-                  <th className="px-3 py-3 font-medium">Lowest</th>
-                  <th className="px-3 py-3 font-medium">Highest</th>
-                  <th className="px-5 py-3 font-medium">Target</th>
-                </tr>
-              </thead>
-              <tbody className="num divide-y divide-line">
-                <tr>
-                  <td className="px-5 py-3 font-sans">Temperature</td>
-                  <td className="px-3 py-3">{stats.temperature.avg.toFixed(1)}°C</td>
-                  <td className="px-3 py-3">{stats.temperature.min.toFixed(1)}°C</td>
-                  <td className="px-3 py-3">{stats.temperature.max.toFixed(1)}°C</td>
-                  <td className="px-5 py-3 text-muted">32–35°C</td>
-                </tr>
-                <tr>
-                  <td className="px-5 py-3 font-sans">Humidity</td>
-                  <td className="px-3 py-3">{stats.humidity.avg.toFixed(1)}%</td>
-                  <td className="px-3 py-3">{stats.humidity.min.toFixed(1)}%</td>
-                  <td className="px-3 py-3">{stats.humidity.max.toFixed(1)}%</td>
-                  <td className="px-5 py-3 text-muted">50–60%</td>
-                </tr>
-                <tr>
-                  <td className="px-5 py-3 font-sans">Hive weight</td>
-                  <td className="px-3 py-3">
-                    {weightChange >= 0 ? "+" : "−"}
-                    {Math.abs(weightChange).toFixed(2)} kg
-                  </td>
-                  <td className="px-3 py-3">{stats.weight.min.toFixed(2)} kg</td>
-                  <td className="px-3 py-3">{stats.weight.max.toFixed(2)} kg</td>
-                  <td className="px-5 py-3 text-muted">1–5 kg</td>
-                </tr>
-              </tbody>
-            </table>
-            <p className="border-t border-line px-5 py-2.5 text-xs text-faint">
-              Weight shows the change over the period. Based on {stats.count.toLocaleString()} readings.
+          <section className="mt-8" aria-label="Summary">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <MeasureCard
+                metric="temperature"
+                headline={`${stats.temperature.avg.toFixed(1)}°C`}
+                marker={stats.temperature.avg}
+                spread={[stats.temperature.min, stats.temperature.max]}
+                foot={
+                  <>
+                    <span>
+                      Low <span className="num text-ink">{stats.temperature.min.toFixed(1)}°C</span>
+                    </span>
+                    <span>
+                      High <span className="num text-ink">{stats.temperature.max.toFixed(1)}°C</span>
+                    </span>
+                  </>
+                }
+              />
+              <MeasureCard
+                metric="humidity"
+                headline={`${stats.humidity.avg.toFixed(1)}%`}
+                marker={stats.humidity.avg}
+                spread={[stats.humidity.min, stats.humidity.max]}
+                foot={
+                  <>
+                    <span>
+                      Low <span className="num text-ink">{stats.humidity.min.toFixed(1)}%</span>
+                    </span>
+                    <span>
+                      High <span className="num text-ink">{stats.humidity.max.toFixed(1)}%</span>
+                    </span>
+                  </>
+                }
+              />
+              <MeasureCard
+                metric="weight"
+                headline={`${weightChange >= 0 ? "+" : "−"}${Math.abs(weightChange).toFixed(2)} kg`}
+                marker={stats.weight.end}
+                spread={[stats.weight.min, stats.weight.max]}
+                foot={
+                  <>
+                    <span>
+                      Low <span className="num text-ink">{stats.weight.min.toFixed(2)} kg</span>
+                    </span>
+                    <span>
+                      High <span className="num text-ink">{stats.weight.max.toFixed(2)} kg</span>
+                    </span>
+                  </>
+                }
+              />
+            </div>
+            <p className="mt-3 text-xs text-faint">
+              Averages for temperature and humidity; weight shows the change over the period. The bar spans the lowest to highest reading. Based on{" "}
+              {stats.count.toLocaleString()} readings.
             </p>
-          </div>
+          </section>
 
-          <section className="mt-8">
-            <h2 className="display text-[17px]">Insights</h2>
-            <ul className="mt-3 space-y-2">
+          <section className="mt-12">
+            <SectionTitle>Insights</SectionTitle>
+            <ul className="grid gap-3 lg:grid-cols-2">
               {insights.map((insight, i) => (
-                <li key={i} className="card flex gap-3 p-4 text-sm leading-relaxed">
-                  <span
-                    className={`mt-1.5 size-2 shrink-0 rounded-full ${insight.tone === "good" ? "bg-good" : insight.tone === "warn" ? "bg-high" : "bg-gold"}`}
-                    aria-hidden
-                  />
-                  <span>
-                    <span className="sr-only">{insight.tone === "good" ? "Good: " : insight.tone === "warn" ? "Warning: " : "Watch: "}</span>
-                    {insight.text}
+                <li key={i} className={`card flex flex-col gap-2 border-l-[3px] p-4 text-sm leading-relaxed ${TONE[insight.tone].edge}`}>
+                  <span className={`cell-tag self-start ${TONE[insight.tone].tag}`}>
+                    <HexMark className="bg-current" size="h-2 w-[7px]" />
+                    {TONE[insight.tone].label}
                   </span>
+                  <span>{insight.text}</span>
                 </li>
               ))}
             </ul>
           </section>
 
-          <section className="mt-8 space-y-4">
-            <h2 className="display text-[17px]">{days <= 7 ? "3-hour" : "Daily"} averages</h2>
+          <section className="mt-12 space-y-4">
+            <SectionTitle>{days <= 7 ? "3-hour" : "Daily"} averages</SectionTitle>
             <MetricChart metric="temperature" data={series} span={chartSpan} />
             <MetricChart metric="humidity" data={series} span={chartSpan} />
             <MetricChart metric="weight" data={series} span={chartSpan} />
