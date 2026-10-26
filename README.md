@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="./docs/beemo-banner.svg" alt="BeeMo Thumbnail" width="800"/>
+  <img src="./docs/beemo-banner.png" alt="BeeMo: every hive, every reading" width="800"/>
 </p>
 
 ##
