@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState, type ReactNode } from "react";
 
 export type NavItem = { href: string; label: string; badge?: number };
 
@@ -62,25 +63,83 @@ export function SideNav({ items }: { items: NavItem[] }) {
   );
 }
 
-export function TopNav({ items }: { items: NavItem[] }) {
+// Below lg: a slim bar with a menu button; the menu slides in from the left like the desktop rail.
+export function MobileMenu({ items, brand, account }: { items: NavItem[]; brand: ReactNode; account: ReactNode }) {
+  const [open, setOpen] = useState(false);
   const pathname = usePathname();
+  const unread = items.some((i) => i.badge);
+
+  // Close after navigating.
+  useEffect(() => setOpen(false), [pathname]);
+
+  // Esc closes; the page behind doesn't scroll while open.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   return (
-    <nav className="-mx-4 flex gap-1 overflow-x-auto px-4 pb-3">
-      {items.map((item) => {
-        const active = isActive(pathname, item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className={`shrink-0 border-b-2 px-3 py-1.5 text-[13px] font-medium ${active ? "border-honey-2 text-honey" : "border-transparent text-rail-muted"}`}
-          >
-            {item.label}
-            {!!item.badge && <span className="num ml-1.5 text-xs text-[#ff8a7a]">{item.badge}</span>}
-          </Link>
-        );
-      })}
-    </nav>
+    <>
+      <header className="comb-dark sticky top-0 z-30 flex h-14 items-center justify-between gap-3 bg-rail px-4 lg:hidden">
+        {brand}
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={unread ? "Open menu, unread alerts" : "Open menu"}
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          className="relative grid size-10 place-items-center rounded-[6px] text-rail-ink hover:bg-rail-2"
+        >
+          <svg viewBox="0 0 24 24" className="size-[22px]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden>
+            <path d="M4 7h16M4 12h16M4 17h10" />
+          </svg>
+          {unread && <span className="absolute top-2 right-2 size-2 rounded-full bg-high ring-2 ring-rail" aria-hidden />}
+        </button>
+      </header>
+
+      <div className={`fixed inset-0 z-40 lg:hidden ${open ? "" : "pointer-events-none"}`} inert={!open}>
+        <div
+          onClick={() => setOpen(false)}
+          className={`absolute inset-0 bg-[rgba(16,14,11,0.55)] transition-opacity duration-200 ${open ? "opacity-100" : "opacity-0"}`}
+          aria-hidden
+        />
+        <aside
+          id="mobile-menu"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menu"
+          className={`absolute inset-y-0 left-0 flex w-[17rem] max-w-[85vw] flex-col overflow-y-auto bg-rail px-3 py-4 text-rail-ink transition-transform duration-200 ease-out ${
+            open ? "translate-x-0 shadow-[20px_0_50px_-20px_rgba(0,0,0,0.6)]" : "-translate-x-full"
+          }`}
+        >
+          <div className="comb-dark pointer-events-none absolute inset-x-0 bottom-0 h-72 [mask-image:linear-gradient(to_top,black,transparent)]" aria-hidden />
+          <div className="relative flex items-center justify-between px-3">
+            {brand}
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Close menu"
+              className="grid size-9 place-items-center rounded-[6px] text-rail-muted hover:bg-rail-2 hover:text-rail-ink"
+            >
+              <svg viewBox="0 0 24 24" className="size-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" aria-hidden>
+                <path d="M6 6l12 12M18 6 6 18" />
+              </svg>
+            </button>
+          </div>
+          <div className="relative mx-3 mt-4 border-t border-rail-line" />
+          <div className="relative mt-4 px-3">
+            <SideNav items={items} />
+          </div>
+          <div className="relative mt-auto pt-6">{account}</div>
+        </aside>
+      </div>
+    </>
   );
 }
 

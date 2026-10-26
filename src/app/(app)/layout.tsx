@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import Logo from "@/components/Logo";
-import { Breadcrumb, SideNav, TopNav, type NavItem } from "@/components/Nav";
+import { Breadcrumb, MobileMenu, SideNav, type NavItem } from "@/components/Nav";
 import { requireSession } from "@/lib/auth";
 import { getApiary, unreadAlertCount } from "@/lib/data";
 import { topUpDemoReadings } from "@/lib/demo";
@@ -27,6 +27,24 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     { href: "/guide", label: "Bee guide" },
   ];
 
+  // Signed-in user and sign out, at the foot of the rail and of the mobile menu.
+  const account = (
+    <div className="flex items-center gap-3 border-t border-rail-line px-3 pt-4">
+      <span className="hex grid h-10 w-9 shrink-0 place-items-center bg-honey-2 text-xs font-bold text-ink">{initials}</span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-[13px] font-semibold">{session.name}</p>
+        <p className="truncate text-xs text-rail-muted capitalize">{session.demo ? "Demo · read-only" : session.role}</p>
+      </div>
+      <form action={logout}>
+        <button className="grid size-8 place-items-center rounded-[6px] text-rail-muted hover:bg-rail-2 hover:text-rail-ink" title="Sign out" aria-label="Sign out">
+          <svg viewBox="0 0 24 24" className="size-[17px]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10" />
+          </svg>
+        </button>
+      </form>
+    </div>
+  );
+
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[15.5rem_1fr]">
       <aside className="sticky top-0 hidden h-dvh flex-col overflow-hidden bg-rail px-3 py-5 text-rail-ink lg:flex">
@@ -40,41 +58,22 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <div className="relative mt-5 px-3">
           <SideNav items={items} />
         </div>
-        <div className="relative mt-auto flex items-center gap-3 border-t border-rail-line px-3 pt-4">
-          <span
-            className="hex grid h-10 w-9 shrink-0 place-items-center bg-honey-2 text-xs font-bold text-ink"
-          >
-            {initials}
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-[13px] font-semibold">{session.name}</p>
-            <p className="truncate text-xs text-rail-muted capitalize">{session.demo ? "Demo · read-only" : session.role}</p>
-          </div>
-          <form action={logout}>
-            <button className="grid size-8 place-items-center rounded-[6px] text-rail-muted hover:bg-rail-2 hover:text-rail-ink" title="Sign out" aria-label="Sign out">
-              <svg viewBox="0 0 24 24" className="size-[17px]" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-                <path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 8l-4 4 4 4M6 12h10" />
-              </svg>
-            </button>
-          </form>
-        </div>
+        <div className="relative mt-auto">{account}</div>
       </aside>
 
       <div className="min-w-0">
-        {/* Mobile: the rail becomes a top band */}
-        <header className="comb-dark bg-rail px-4 pt-4 lg:hidden">
-          <div className="mb-3 flex items-center justify-between">
-            <Link href="/">
+        {/* Below lg: a menu bar; the rail opens as a slide-in menu */}
+        <MobileMenu
+          items={items}
+          account={account}
+          brand={
+            <Link href="/" aria-label="BeeMo overview">
               <Logo tone="light" />
             </Link>
-            <form action={logout}>
-              <button className="text-xs text-rail-muted">Sign out</button>
-            </form>
-          </div>
-          <TopNav items={items} />
-        </header>
+          }
+        />
 
-        <div className="sticky top-0 z-20 flex h-14 items-center justify-between gap-4 border-b border-line bg-paper/90 px-4 backdrop-blur sm:px-8">
+        <div className="z-20 flex h-14 items-center lg:sticky lg:top-0 justify-between gap-4 border-b border-line bg-paper/90 px-4 backdrop-blur sm:px-8">
           <Breadcrumb apiary={apiary?.name ?? "Apiary"} items={items} />
           {session.demo && (
             <p className="flex shrink-0 items-center gap-2 text-[13px]">
