@@ -40,13 +40,18 @@ export function SideNav({ items }: { items: NavItem[] }) {
               active ? "bg-rail-2 text-rail-ink" : "text-rail-muted hover:bg-rail-2/60 hover:text-rail-ink"
             }`}
           >
-            {active && <span className="absolute top-1.5 bottom-1.5 -left-3 w-[3px] rounded-r bg-honey" aria-hidden />}
+            {active && (
+              <span
+                className="hex absolute top-1/2 -left-[15px] h-[14px] w-3 -translate-y-1/2 bg-honey-2"
+                aria-hidden
+              />
+            )}
             <span className={active ? "text-honey" : ""}>
               <NavIcon href={item.href} />
             </span>
             <span className="flex-1">{item.label}</span>
             {!!item.badge && (
-              <span className="num rounded-[4px] bg-high px-1.5 text-[11px] leading-5 font-semibold text-white" aria-label={`${item.badge} unread`}>
+              <span className="num cell-tag bg-high py-0 text-[11px] leading-5 text-white" aria-label={`${item.badge} unread`}>
                 {item.badge > 99 ? "99+" : item.badge}
               </span>
             )}
@@ -68,7 +73,7 @@ export function TopNav({ items }: { items: NavItem[] }) {
             key={item.href}
             href={item.href}
             aria-current={active ? "page" : undefined}
-            className={`shrink-0 rounded-[6px] px-3 py-1.5 text-[13px] font-medium ${active ? "bg-rail-2 text-honey" : "text-rail-muted"}`}
+            className={`shrink-0 border-b-2 px-3 py-1.5 text-[13px] font-medium ${active ? "border-honey-2 text-honey" : "border-transparent text-rail-muted"}`}
           >
             {item.label}
             {!!item.badge && <span className="num ml-1.5 text-xs text-[#ff8a7a]">{item.badge}</span>}

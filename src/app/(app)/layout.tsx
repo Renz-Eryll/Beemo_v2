@@ -29,17 +29,23 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-dvh lg:grid lg:grid-cols-[15.5rem_1fr]">
-      <aside className="sticky top-0 hidden h-dvh flex-col bg-rail px-3 py-5 text-rail-ink lg:flex">
-        <Link href="/" className="px-3">
+      <aside className="sticky top-0 hidden h-dvh flex-col overflow-hidden bg-rail px-3 py-5 text-rail-ink lg:flex">
+        {/* Comb lattice fading up from the foot of the rail */}
+        <div className="comb-dark pointer-events-none absolute inset-x-0 bottom-0 h-72 [mask-image:linear-gradient(to_top,black,transparent)]" aria-hidden />
+        <Link href="/" className="relative px-3">
           <Logo tone="light" />
           <span className="eyebrow mt-1.5 block text-honey">Hive monitoring</span>
         </Link>
-        <div className="mx-3 mt-5 border-t border-rail-line" />
-        <div className="mt-5 px-3">
+        <div className="relative mx-3 mt-5 border-t border-rail-line" />
+        <div className="relative mt-5 px-3">
           <SideNav items={items} />
         </div>
-        <div className="mt-auto flex items-center gap-3 border-t border-rail-line px-3 pt-4">
-          <span className="grid size-9 shrink-0 place-items-center rounded-full bg-rail-2 text-xs font-semibold text-honey">{initials}</span>
+        <div className="relative mt-auto flex items-center gap-3 border-t border-rail-line px-3 pt-4">
+          <span
+            className="hex grid h-10 w-9 shrink-0 place-items-center bg-honey-2 text-xs font-bold text-ink"
+          >
+            {initials}
+          </span>
           <div className="min-w-0 flex-1">
             <p className="truncate text-[13px] font-semibold">{session.name}</p>
             <p className="truncate text-xs text-rail-muted capitalize">{session.demo ? "Demo · read-only" : session.role}</p>
@@ -56,7 +62,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
       <div className="min-w-0">
         {/* Mobile: the rail becomes a top band */}
-        <header className="bg-rail px-4 pt-4 lg:hidden">
+        <header className="comb-dark bg-rail px-4 pt-4 lg:hidden">
           <div className="mb-3 flex items-center justify-between">
             <Link href="/">
               <Logo tone="light" />
@@ -68,11 +74,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <TopNav items={items} />
         </header>
 
-        <div className="flex h-14 items-center justify-between gap-4 border-b border-line px-4 sm:px-8">
+        <div className="sticky top-0 z-20 flex h-14 items-center justify-between gap-4 border-b border-line bg-paper/90 px-4 backdrop-blur sm:px-8">
           <Breadcrumb apiary={apiary?.name ?? "Apiary"} items={items} />
           {session.demo && (
             <p className="flex shrink-0 items-center gap-2 text-[13px]">
-              <span className="rounded-[4px] bg-honey px-1.5 py-0.5 text-[11px] font-semibold tracking-wide text-ink uppercase">Demo</span>
+              <span className="cell-tag bg-honey tracking-wide text-ink uppercase">Demo</span>
               <span className="hidden text-muted sm:inline">Read-only, simulated data.</span>
               <Link href="/signup" className="font-semibold text-honey-text hover:underline">
                 Create your apiary
@@ -81,7 +87,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           )}
         </div>
 
-        <main className="mx-auto max-w-6xl px-4 py-8 sm:px-8 sm:py-10">{children}</main>
+        {/* Left-aligned with the top bar; capped only on very wide screens */}
+        <main className="max-w-[1600px] px-4 py-7 sm:px-8 sm:py-8">{children}</main>
       </div>
     </div>
   );
