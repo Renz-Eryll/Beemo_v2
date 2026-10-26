@@ -5,7 +5,7 @@ import { Area, CartesianGrid, ComposedChart, ReferenceArea, ReferenceLine, Respo
 import type { Metric } from "@/db/schema";
 import type { SeriesPoint } from "@/lib/data";
 import { RANGES, formatValue, rangeStatus, statusLabel } from "@/lib/ranges";
-import { STATUS_TEXT } from "./Status";
+import { statusText } from "./Status";
 
 type Props = { metric: Metric; data: SeriesPoint[]; span: "day" | "week" | "month" | "quarter" };
 
@@ -123,7 +123,7 @@ export default function MetricChart({ metric, data, span }: Props) {
                       })}
                     </p>
                     <p className="num mt-0.5 text-sm text-ink">{formatValue(metric, value)}</p>
-                    <p className={`font-semibold ${STATUS_TEXT[status]}`}>{statusLabel(metric, status)}</p>
+                    <p className={`font-semibold ${statusText(metric, status)}`}>{statusLabel(metric, status)}</p>
                   </div>
                 );
               }}

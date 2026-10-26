@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 import { addWorker, removeWorker } from "@/app/actions/members";
 import { ActionForm, ConfirmButton, SubmitButton } from "@/components/forms";
+import PageHeader from "@/components/PageHeader";
 import { requireAdmin } from "@/lib/auth";
 import { listMembers } from "@/lib/data";
 import { dateLabel } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Workers" };
+
+const initials = (name: string) =>
+  name
+    .split(/\s+/)
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
 export default async function WorkersPage() {
   const session = await requireAdmin();
@@ -13,46 +22,52 @@ export default async function WorkersPage() {
 
   return (
     <>
-      <h1 className="display text-[34px] leading-[1.05]">Workers</h1>
-      <p className="mt-2 max-w-2xl text-muted">Workers can monitor hives, see alerts and view harvest cycles. Reports and settings stay with the admin.</p>
+      <PageHeader
+        eyebrow={`${members.length} ${members.length === 1 ? "member" : "members"}`}
+        title="Workers"
+        description="Workers can monitor hives, see alerts and view harvest cycles. Reports and settings stay with the admin."
+      />
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-[1fr_20rem]">
-        <ul className="card divide-y divide-line self-start">
-          {members.map((m) => (
-            <li key={m.id} className="flex items-center gap-4 px-5 py-4">
-              <span className="grid size-9 shrink-0 place-items-center rounded-full bg-sunken text-xs font-semibold text-muted">
-                {m.name
-                  .split(/\s+/)
-                  .map((p) => p[0])
-                  .slice(0, 2)
-                  .join("")
-                  .toUpperCase()}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium">
-                  {m.name} {m.id === session.userId && <span className="font-normal text-faint">(you)</span>}
-                </p>
-                <p className="truncate text-xs text-faint">
-                  {m.email}
-                  {m.phone && ` · ${m.phone}`}
-                </p>
-              </div>
-              <span className="hidden text-xs text-muted capitalize sm:inline">
-                {m.role} · since {dateLabel(m.createdAt)}
-              </span>
-              {m.role === "worker" && (
-                <ConfirmButton action={removeWorker.bind(null, m.id)} confirm={`Remove ${m.name}? They won't be able to sign in.`}>
-                  Remove
-                </ConfirmButton>
-              )}
-            </li>
-          ))}
+      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <ul className="grid content-start gap-3 sm:grid-cols-2 2xl:grid-cols-3">
+          {members.map((m) => {
+            const admin = m.role === "admin";
+            return (
+              <li key={m.id} className="card flex flex-col">
+                <div className="flex items-center gap-4 p-4">
+                  <span className={`hex grid h-[52px] w-[45px] shrink-0 place-items-center text-[13px] font-bold ${admin ? "bg-honey-2 text-ink" : "bg-sunken text-muted"}`}>
+                    {initials(m.name)}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold">
+                      {m.name} {m.id === session.userId && <span className="font-normal text-faint">(you)</span>}
+                    </p>
+                    <p className="truncate text-xs text-muted">{m.email}</p>
+                    {m.phone && <p className="num truncate text-xs text-faint">{m.phone}</p>}
+                  </div>
+                </div>
+                <div className="mt-auto flex items-center justify-between gap-3 border-t border-line px-4 py-2.5">
+                  <span className="flex items-center gap-2 text-xs text-muted">
+                    <span className={`cell-tag capitalize ${admin ? "bg-honey-soft text-honey-text" : "bg-sunken text-muted"}`}>{m.role}</span>
+                    since {dateLabel(m.createdAt)}
+                  </span>
+                  {!admin && (
+                    <ConfirmButton action={removeWorker.bind(null, m.id)} confirm={`Remove ${m.name}? They won't be able to sign in.`} className="btn-ghost h-7 px-2 text-[12px]">
+                      Remove
+                    </ConfirmButton>
+                  )}
+                </div>
+              </li>
+            );
+          })}
         </ul>
 
-        <section className="card self-start p-5">
-          <h2 className="display text-[17px]">Add a worker</h2>
-          <p className="mt-1 text-xs text-muted">Share the temporary password with them in person.</p>
-          <ActionForm action={addWorker} className="mt-4 space-y-4">
+        <section className="card w-full max-w-xl self-start overflow-hidden xl:max-w-none">
+          <div className="comb-dark bg-rail px-5 py-4 text-rail-ink">
+            <h2 className="display text-[17px] text-honey">Add a worker</h2>
+            <p className="mt-0.5 text-xs text-rail-muted">Share the temporary password with them in person.</p>
+          </div>
+          <ActionForm action={addWorker} className="space-y-4 p-5">
             <div>
               <label className="label" htmlFor="name">
                 Name

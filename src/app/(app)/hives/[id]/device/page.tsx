@@ -4,9 +4,10 @@ import Link from "next/link";
 import { deleteHive, rotateDeviceKey, updateHive } from "@/app/actions/hives";
 import DeviceKey from "@/components/DeviceKey";
 import { ActionForm, ConfirmButton, SubmitButton } from "@/components/forms";
+import PageHeader from "@/components/PageHeader";
 import { requireAdmin } from "@/lib/auth";
 import { getHive } from "@/lib/data";
-import { timeAgo } from "@/lib/format";
+import { isOnline, timeAgo } from "@/lib/format";
 
 export const metadata: Metadata = { title: "Device & settings" };
 
@@ -15,24 +16,30 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
   const hive = await getHive(session.apiaryId, (await params).id);
   const h = await headers();
   const origin = `${h.get("x-forwarded-proto") ?? "https"}://${h.get("host")}`;
+  const online = isOnline(hive.lastSeenAt);
 
   return (
     <>
-      <Link href={`/hives/${hive.id}`} className="text-sm text-muted hover:text-ink">
-        ← {hive.name}
-      </Link>
-      <h1 className="display mt-3 text-[34px] leading-[1.05]">Device &amp; settings</h1>
+      <PageHeader back={{ href: `/hives/${hive.id}`, label: hive.name }} eyebrow={hive.name} title="Device & settings" />
 
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
-        <section className="card p-5">
-          <h2 className="display text-[17px]">Sensor kit</h2>
-          <p className="mt-1 mb-4 text-sm text-muted">
-            {hive.lastSeenAt ? `Last reported ${timeAgo(hive.lastSeenAt)}.` : "This hive hasn't reported yet."} Each hive’s ESP8266 uses its own key.
-          </p>
-          <DeviceKey rotate={rotateDeviceKey.bind(null, hive.id)} hint={hive.deviceKeyHint} ingestUrl={`${origin}/api/ingest`} />
-          <Link href="/guide#device" className="mt-5 inline-block text-sm text-muted underline-offset-4 hover:text-ink hover:underline">
-            Wiring and firmware setup
-          </Link>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <section className="card self-start overflow-hidden">
+          <div className="comb-dark flex items-center justify-between gap-3 bg-rail px-5 py-4 text-rail-ink">
+            <div>
+              <h2 className="display text-[17px] text-honey">Sensor kit</h2>
+              <p className="mt-0.5 text-xs text-rail-muted">Each hive’s ESP8266 uses its own key.</p>
+            </div>
+            <span className={`cell-tag ${online ? "bg-good-bright/20 text-good-bright" : "bg-rail-2 text-rail-muted"}`}>
+              <span className={`size-1.5 rounded-full ${online ? "bg-good-bright" : "bg-rail-muted"}`} aria-hidden />
+              {hive.lastSeenAt ? `Reported ${timeAgo(hive.lastSeenAt)}` : "Not reported yet"}
+            </span>
+          </div>
+          <div className="p-5">
+            <DeviceKey rotate={rotateDeviceKey.bind(null, hive.id)} hint={hive.deviceKeyHint} ingestUrl={`${origin}/api/ingest`} />
+            <Link href="/guide#device" className="mt-5 inline-block text-sm font-semibold text-honey-text underline-offset-4 hover:underline">
+              Wiring and firmware setup →
+            </Link>
+          </div>
         </section>
 
         <div className="space-y-6">
@@ -55,7 +62,7 @@ export default async function DevicePage({ params }: { params: Promise<{ id: str
             </ActionForm>
           </section>
 
-          <section className="card p-5">
+          <section className="card border-high/30 bg-[repeating-linear-gradient(-45deg,transparent_0_12px,var(--color-high-soft)_12px_13px)] p-5">
             <h2 className="display text-[17px] text-high">Delete hive</h2>
             <p className="mt-1 mb-4 text-sm text-muted">Removes the hive with all its readings, cycles and alerts.</p>
             <ConfirmButton

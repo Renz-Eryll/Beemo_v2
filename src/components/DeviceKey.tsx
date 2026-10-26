@@ -20,10 +20,10 @@ export default function DeviceKey({ rotate, hint, ingestUrl }: { rotate: Rotate;
   return (
     <div>
       {key ? (
-        <div className="rounded-lg border border-honey/40 bg-honey-soft p-4">
+        <div className="rounded-[6px] border border-gold/40 bg-honey-soft p-4">
           <p className="text-sm font-medium">Copy this key now. It won’t be shown again.</p>
           <div className="mt-3 flex gap-2">
-            <code className="num min-w-0 flex-1 truncate rounded-md bg-surface px-3 py-2 text-sm">{key}</code>
+            <code className="num min-w-0 flex-1 truncate rounded-[6px] bg-surface px-3 py-2 text-sm">{key}</code>
             <button type="button" onClick={copy} className="btn-outline">
               {copied ? "Copied" : "Copy"}
             </button>

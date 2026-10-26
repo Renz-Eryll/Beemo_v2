@@ -3,7 +3,9 @@
 /* BeeMo design system.
    Structure follows a dark rail + light canvas console: hairline borders, a 6px radius,
    uppercase condensed headings, mono numbers. The brand is the logo's honey yellow,
-   with a deeper gold for text and chart lines on light surfaces. Light theme only. */
+   with a deeper gold for text and chart lines on light surfaces. Light theme only.
+   The signature shape is the comb cell: primary buttons and tags end in hexagon points,
+   progress fills cells, and dark bands carry a faint honeycomb lattice. */
 
 @theme {
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
@@ -42,6 +44,10 @@
   --color-good-soft: #ddf1e5;
   --color-high-soft: #fbe4df;
   --color-low-soft: #e0eafb;
+  /* the same states, lifted for the dark rail and hero bands */
+  --color-good-bright: #6fd39b;
+  --color-high-bright: #ff8a7a;
+  --color-low-bright: #8db4ff;
 }
 
 :root {
@@ -79,14 +85,45 @@
 @utility btn {
   @apply inline-flex h-9 items-center justify-center gap-2 rounded-[6px] px-3.5 text-[13px] font-semibold whitespace-nowrap transition-colors disabled:pointer-events-none disabled:opacity-50;
 }
+/* Hexagon-pointed ends; the inset ring keeps focus visible inside the clip. */
+@utility hex-ends {
+  clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
+  &:focus-visible {
+    outline: none;
+    box-shadow: inset 0 0 0 2px var(--color-ink);
+  }
+}
 @utility btn-primary {
-  @apply btn bg-honey-2 text-ink hover:bg-[#eccd4f];
+  @apply btn hex-ends rounded-none bg-honey-2 px-6 text-ink hover:bg-[#eccd4f];
 }
 @utility btn-honey {
-  @apply btn bg-honey-2 text-ink hover:bg-honey;
+  @apply btn hex-ends rounded-none bg-honey-2 px-6 text-ink hover:bg-honey;
 }
 @utility btn-dark {
-  @apply btn bg-ink text-surface hover:bg-ink/85;
+  @apply btn hex-ends rounded-none bg-ink px-6 text-surface hover:bg-ink/85;
+}
+/* Comb cells: pointy-top for markers and avatars, flat-top for hives in the comb */
+@utility hex {
+  clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
+}
+@utility hex-flat {
+  clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%);
+}
+/* Small hexagon-ended label */
+@utility cell-tag {
+  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 50%, calc(100% - 6px) 100%, 6px 100%, 0 50%);
+  @apply inline-flex shrink-0 items-center gap-1.5 px-2.5 py-0.5 text-[11px] font-semibold whitespace-nowrap;
+}
+/* Honeycomb lattice for dark surfaces and light ones */
+@utility comb-dark {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24.25' height='42' viewBox='0 0 24.25 42'%3E%3Cpath d='M12.125 0 24.25 7v14l-12.125 7L0 21V7ZM12.125 28v14' fill='none' stroke='rgba(248,238,155,0.07)' stroke-width='1'/%3E%3C/svg%3E");
+}
+@utility comb-light {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24.25' height='42' viewBox='0 0 24.25 42'%3E%3Cpath d='M12.125 0 24.25 7v14l-12.125 7L0 21V7ZM12.125 28v14' fill='none' stroke='rgba(138,100,0,0.09)' stroke-width='1'/%3E%3C/svg%3E");
+}
+/* Dark band that frames a page's main reading */
+@utility hero {
+  @apply comb-dark relative overflow-hidden rounded-[6px] bg-rail text-rail-ink;
 }
 @utility btn-outline {
   @apply btn border border-line-strong bg-surface text-ink hover:border-faint;
